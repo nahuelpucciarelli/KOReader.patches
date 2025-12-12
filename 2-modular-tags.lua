@@ -14,8 +14,6 @@ Available modes:
 - "pages"          : Show page count (e.g., "350 pages")
 - "tags"           : Show original calibre tags/keywords  
 - "pages_and_tags" : Show both (e.g., "350 pages • tag1 • tag2")
-- "publisher"      : Show publisher information
-- "language"       : Show book language
 - "custom"         : Define your own in the custom function
 ]]--
 
@@ -24,10 +22,10 @@ local userpatch = require("userpatch")
 -- ============================================================================
 -- CONFIGURATION - Change these settings
 -- ============================================================================ 
-local DISPLAY_MODE = "pages"  -- Options: "pages", "tags", "pages_and_tags", "publisher", "language", "custom"
+local DISPLAY_MODE = "pages"  -- Options: "pages", "tags", "pages_and_tags", "custom"
 
 -- Font customization
-local CUSTOM_FONT_SIZE_OFFSET = 4  -- Default is 3 (smaller than author font) 
+local CUSTOM_FONT_SIZE_OFFSET = nil  -- Default is 3 (smaller than author font) 
 local CUSTOM_FONT_MIN = nil   -- Default is 10 
 
 -- ============================================================================
@@ -62,16 +60,6 @@ local function patchCoverBrowser(CoverBrowser)
         else
             return tostring(pages_num) .. " " .. _("pages")
         end
-    end
-    
-    local function formatPublisher(bookinfo)
-        if not bookinfo.publisher or bookinfo.publisher == "" then return nil end
-        return BD.auto(bookinfo.publisher)
-    end
-    
-    local function formatLanguage(bookinfo)
-        if not bookinfo.language or bookinfo.language == "" then return nil end
-        return BD.auto(bookinfo.language)
     end
     
     -- ========================================================================
@@ -146,12 +134,6 @@ local function patchCoverBrowser(CoverBrowser)
             
         elseif DISPLAY_MODE == "pages_and_tags" then
             result = formatPagesAndTags(bookinfo, tags_limit)
-            
-        elseif DISPLAY_MODE == "publisher" then
-            result = formatPublisher(bookinfo)
-            
-        elseif DISPLAY_MODE == "language" then
-            result = formatLanguage(bookinfo)
             
         elseif DISPLAY_MODE == "custom" then
             result = customFormat(bookinfo, tags_limit)
