@@ -30,8 +30,6 @@ local DISPLAY_MODE = "pages"  -- Change this!
 - `"pages"` - Show page count (e.g., "350 pages")
 - `"tags"` - Show original calibre tags (default behavior)
 - `"pages_and_tags"` - Show both (e.g., "350 pages • Fiction • Sci-Fi")
-- `"publisher"` - Show publisher name
-- `"language"` - Show book language code
 - `"custom"` - Use the custom function (see below)
 
 ### 4. Restart KOReader
@@ -55,22 +53,6 @@ local DISPLAY_MODE = "pages_and_tags"
 ```
 
 Result: `350 pages • Fiction • Science Fiction • Hugo Award Winner`
-
-### Example 3: Show Publisher
-
-```lua
-local DISPLAY_MODE = "publisher"
-```
-
-Result: `Tor Books` appears below author/series
-
-### Example 4: Show Language
-
-```lua
-local DISPLAY_MODE = "language"
-```
-
-Result: `en` or `es` or `fr` appears below author/series
 
 ## Customization
 
@@ -99,19 +81,9 @@ local DISPLAY_MODE = "custom"
 local function customFormat(bookinfo, tags_limit)
     local parts = {}
     
-    -- Show publisher
-    if bookinfo.publisher then
-        table.insert(parts, BD.auto(bookinfo.publisher))
-    end
-    
     -- Show page count
     if bookinfo.pages and bookinfo.pages > 0 then
         table.insert(parts, tostring(bookinfo.pages) .. " pages")
-    end
-    
-    -- Show language
-    if bookinfo.language then
-        table.insert(parts, "Lang: " .. bookinfo.language)
     end
     
     -- Show series position (already shown elsewhere, but as example)
@@ -133,8 +105,6 @@ end
 - `bookinfo.authors` - Author(s) 
 - `bookinfo.series` - Series name
 - `bookinfo.series_index` - Series position
-- `bookinfo.publisher` - Publisher name
-- `bookinfo.language` - Language code
 - `bookinfo.keywords` - Original tags/keywords
 - `bookinfo.description` - Book description
 
@@ -184,11 +154,6 @@ local function customFormat(bookinfo, tags_limit)
         table.insert(parts, p .. " pg")
     end
     
-    -- Show publisher in parentheses
-    if bookinfo.publisher then
-        table.insert(parts, "(" .. bookinfo.publisher .. ")")
-    end
-    
     -- Show first 3 original tags
     local original_formatTags = ptutil.formatTags
     local tags = original_formatTags(bookinfo.keywords, 3)
@@ -200,7 +165,7 @@ local function customFormat(bookinfo, tags_limit)
 end
 ```
 
-Result: `350 pg | (Tor Books) | Fiction • Sci-Fi • Adventure`
+Result: `350 pg | Fiction • Sci-Fi • Adventure`
 
 ## Uninstall
 
