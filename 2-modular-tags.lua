@@ -1,10 +1,21 @@
 --[[
 Modular User Patch for Project: Title - Replace Tags Field
 
+This patch hijacks the "tags" display field to show different metadata.
+Simply change the DISPLAY_MODE setting below to choose what to display.
+
+Installation:
+1. Save this file as "modular-tags.lua" in: koreader/patches/
+2. Restart KOReader
+3. Enable "Show calibre tags/keywords" in Project: Title settings
+4. The field will show your chosen metadata
+
 Available modes:
 - "pages"          : Show page count (e.g., "350 pages")
 - "tags"           : Show original calibre tags/keywords  
 - "pages_and_tags" : Show both (e.g., "350 pages • tag1 • tag2")
+- "publisher"      : Show publisher information
+- "language"       : Show book language
 - "custom"         : Define your own in the custom function
 ]]--
 
@@ -13,10 +24,10 @@ local userpatch = require("userpatch")
 -- ============================================================================
 -- CONFIGURATION - Change these settings
 -- ============================================================================ 
-local DISPLAY_MODE = "pages"  -- Options: "pages", "tags", "pages_and_tags", "custom"
+local DISPLAY_MODE = "pages"  -- Options: "pages", "tags", "pages_and_tags", "publisher", "language", "custom"
 
 -- Font customization
-local CUSTOM_FONT_SIZE_OFFSET = nil  -- Default is 3 (smaller than author font) 
+local CUSTOM_FONT_SIZE_OFFSET = 1  -- Default is 3 (smaller than author font) 
 local CUSTOM_FONT_MIN = nil   -- Default is 10 
 
 -- ============================================================================
@@ -53,6 +64,16 @@ local function patchCoverBrowser(CoverBrowser)
         end
     end
     
+    local function formatPublisher(bookinfo)
+        if not bookinfo.publisher or bookinfo.publisher == "" then return nil end
+        return BD.auto(bookinfo.publisher)
+    end
+    
+    local function formatLanguage(bookinfo)
+        if not bookinfo.language or bookinfo.language == "" then return nil end
+        return BD.auto(bookinfo.language)
+    end
+    
     -- ========================================================================
     -- Custom format function (only used if DISPLAY_MODE = "custom")
     -- ======================================================================== 
@@ -69,7 +90,7 @@ local function patchCoverBrowser(CoverBrowser)
         end
         
         if #parts > 0 then
-            return table.concat(parts, " • ")
+            return table.concat(parts, " | ")
         end
         return nil
     end
@@ -126,6 +147,12 @@ local function patchCoverBrowser(CoverBrowser)
         elseif DISPLAY_MODE == "pages_and_tags" then
             result = formatPagesAndTags(bookinfo, tags_limit)
             
+        elseif DISPLAY_MODE == "publisher" then
+            result = formatPublisher(bookinfo)
+            
+        elseif DISPLAY_MODE == "language" then
+            result = formatLanguage(bookinfo)
+            
         elseif DISPLAY_MODE == "custom" then
             result = customFormat(bookinfo, tags_limit)
         end
@@ -162,7 +189,7 @@ local function patchCoverBrowser(CoverBrowser)
     if CUSTOM_FONT_SIZE_OFFSET then
         ptutil.list_defaults.tags_font_offset = CUSTOM_FONT_SIZE_OFFSET
     end
-
+    
     if CUSTOM_FONT_MIN then
         ptutil.list_defaults.tags_font_min = CUSTOM_FONT_MIN
     end
@@ -170,5 +197,4 @@ local function patchCoverBrowser(CoverBrowser)
     logger.info("Modular Tags Patch: Applied.")
 end
 
-userpatch.registerPatchPluginFunc("coverbrowser", patchCoverBrowser)
-
+userpatch.registerPatchPluginFunc("projecttitle", patchCoverBrowser)
